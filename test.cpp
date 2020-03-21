@@ -1,4 +1,3 @@
-// I don't like my answer. I need to think more -_-
 #include <string>
 #include <vector>
 
