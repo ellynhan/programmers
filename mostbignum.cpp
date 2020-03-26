@@ -28,5 +28,6 @@ string solution(vector<int> numbers) {
     for(int i=numbers.size()-1; i>-1; i--){
         answer+=str[i];
     }
+    if(answer<"1")answer="0";
     return answer;
 }
