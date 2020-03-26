@@ -19,7 +19,7 @@ void swapNode(Node* first, Node* second){
 }
 vector<int> solution(vector<string> genres, vector<int> plays) {
     vector<int> answer;
-    map<string,Node*> table;
+   map<string,Node*> table;
     map<string,Node*>::iterator it;
     for(int i=0; i<genres.size(); i++){
         if(table.count(genres[i])){
@@ -35,10 +35,10 @@ vector<int> solution(vector<string> genres, vector<int> plays) {
                 Next->playNum=plays[i];
                 pre->next=Next;
             }
-            pre->sum=plays[i]+pre->playNum;
-            if(plays[i]>pre->playNum){ //swap
+            if(plays[i]>pre->playNum){
                 swapNode(pre->next,pre);
             }
+            pre->sum+=plays[i];
         }else{
             Node* tmp=new Node;
             tmp->primeNum=i;
