@@ -5,7 +5,6 @@ using namespace std;
 struct Node{
     int primeNum;
     int playNum;
-    int sum=0;
     struct Node* next=NULL;
 };
 
@@ -17,6 +16,7 @@ void swapNode(Node* first, Node* second){
     first->primeNum=second->primeNum;
     second->primeNum=tmp;
 }
+
 vector<int> solution(vector<string> genres, vector<int> plays) {
     vector<int> answer;
     map<string,Node*> table;
@@ -35,21 +35,22 @@ vector<int> solution(vector<string> genres, vector<int> plays) {
                 Next->playNum=plays[i];
                 pre->next=Next;
             }
-            pre->sum=plays[i]+pre->playNum;
-            if(plays[i]>pre->playNum){ //swap
+            if(plays[i]>pre->playNum){
                 swapNode(pre->next,pre);
             }
         }else{
             Node* tmp=new Node;
             tmp->primeNum=i;
-            tmp->playNum=tmp->sum=plays[i];
+            tmp->playNum=plays[i];
             table.insert(make_pair(genres[i], tmp));
         }
     }
     multimap<int,string,greater<int>> comp;
     multimap<int,string,greater<int>>::iterator iter;
     for(it=table.begin(); it!=table.end(); it++){
-        comp.insert(make_pair(it->second->sum, it->first));
+        int tmp = it->second->playNum;
+        if(it->second->next)tmp+=it->second->next->playNum;
+        comp.insert(make_pair(tmp, it->first));
     }
     for(iter=comp.begin(); iter!=comp.end(); iter++){
         Node* tmp = table.find(iter->second)->second;
