@@ -1,34 +1,28 @@
-#include <string>
+#include <algorithm>
 #include <vector>
-#include <set>
+#include <queue>
 using namespace std;
-void process(vector<vector<int>>& jobs, vector<int>&used, int timeline,int sum,set<int>& average){
-    int check=0;
-    for(int i : used){if(i==0)check++;}
-    if(check!=0){
-        for(int i=0; i<jobs.size(); i++){
-            int tmp = timeline;
-            if(used[i]==1)continue;
-            used[i]=1;
-            if(jobs[i][0]>tmp)tmp=jobs[i][0];
-            tmp+=jobs[i][1];
-            process(jobs,used,tmp,sum+tmp-jobs[i][0],average);
-            used[i]=0;
-        }
-    }else{
-        average.insert(sum/jobs.size());
-        return ;
+struct compare{
+    bool operator()(vector<int>& a, vector<int>& b){
+        return a.at(1)>b.at(1);
     }
-}
+};
 int solution(vector<vector<int>> jobs) {
-    int answer = 0;
-    vector<int> used(jobs.size(),0);
-    set<int> average;
-    int timeline=0,sum=0;
-    timeline+=jobs[0][1];
-    used[0]=1;
-    sum=timeline-jobs[0][0];//현재 있는 위치에서 요청위치를 뺌 = 걸린 시간
-    process(jobs,used,timeline,sum,average);
-    answer=*average.begin();
-    return answer;
+    priority_queue<vector<int>,vector<vector<int>>,compare> average;
+    int time =0,i=0,answer=0;
+    sort(jobs.begin(),jobs.end());
+    while(i<jobs.size()||!average.empty()){
+        while(i<jobs.size()&&time>=jobs[i][0]){
+            average.push(jobs[i++]);
+        }
+        if(!average.empty()){
+            time+=average.top().at(1);
+            answer+=time-average.top().at(0);
+            average.pop();
+        }else{
+            time=jobs[i][0];
+        }
+        
+    }
+    return answer/jobs.size();
 }
