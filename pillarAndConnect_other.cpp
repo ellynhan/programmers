@@ -142,3 +142,20 @@ int main(void) {
     return 0;
 }
 #endif
+// 이건 다른 코드인데 이 코드랑 같이 매크로를 확인해 볼 때 사용해보자.
+// #define INF -1 - (1<<31)
+// #define INFLL -1ll - (1ll<<63)
+// #define FOR(i, n) for(int i = 0; i < n; i++)
+// #define FORD(i, n) for(int i = n; i >= 0; i--)
+
+// #define MAX 2000000000
+// #define MAX_C
+
+// #define MOD 1000000007
+
+// using namespace std;
+
+// typedef long long ll;
+// typedef pair<int, int> ii;
+
+// int cache[8][1 << 16];
