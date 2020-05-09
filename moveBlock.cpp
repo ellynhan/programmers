@@ -1,59 +1,106 @@
-int bfs(vector<vector<int>>& map, vector<int> c){ //(y,x,direction) direction 0 1 2 3 오 왼 위 아래
-    int n=map.size()-2;
-    vector<vector<int>> move ={{0,1},{0,-1},{-1,0},{1,0}};
-    queue<vector<int>> q;
-    q.push(c);
-    while(!q.empty()){
-        vector<int> now = q.front();
-        q.pop();
-        if((now[0]==n&&now[1]==n)||(now[2]==0&&now[0]==n&&now[1]==n-1)||(now[2]==3&&now[0]==n-1&&now[1]==n)){
-            return now[3];
-        }
-        if(now[2]==0||now[2]==1){
-            for(auto a : move){
-                if(map[now[0]+a[0]][now[1]+a[1]]==0&&map[now[0]+a[0]][now[1]+now[2]*-2+1+a[1]]==0){
-                    q.push({now[0]+a[0],now[1]+a[1],now[2],now[3]+1});
-                }
-            }
-            if(map[now[0]+1][now[1]]==0&&map[now[0]+1][now[1]+now[2*-2+1]]==0){//회전가능
-                q.push({now[0]+1,now[1]+1+now[2]*-2,2,now[3]+1});
-                q.push({now[0],now[1],3,now[3]+1});
-            }
-        }else{
-            for(auto a : move){
-                if(map[now[0]+a[0]][now[1]+a[1]]==0&&map[now[0]+(now[2]-2)*2-1+a[0]][now[1]+a[1]]==0){
-                    q.push({now[0]+a[0],now[1]+a[1],now[2],now[3]+1});
-                }
-            }
-            if(map[now[0]][now[1]+1]==0&&map[now[0]+(now[2]-2)*-2+1][now[1]+1]==0){//회전가능
-                if(now[2]==2){
-                    q.push({now[0],now[1],0,now[3]+1});
-                    q.push({now[0]-1,now[1]+1,1,now[3]+1});
-                }else{
-                    q.push({now[0]+1,now[1]+1,1,now[3]+1});
-                    q.push({now[0],now[1],0,now[3]+1});
-                }
-            }
-        }
-    }
-    return 10000;
+#include <vector>
+#include <queue>
+using namespace std;
+ //move
+const int dx[] = { -1, 0, 1, 0 };
+const int dy[] = { 0, 1, 0, -1 };
+//옆에있는 블럭이 오른쪽에있거나 위에있는경우로 한정
+const int ddx[] = { 0, 1 };
+const int ddy[] = { 1, 0 };
+
+int N;
+int conv(int a, int b, int c) {
+    return a * 200 + b * 2 + c;
 }
-int main(){
-    vector<vector<int>> board={{0, 0, 0, 1, 1}, {0, 0, 0, 1, 0}, {0, 1, 0, 1, 1}, {1, 1, 0, 0, 1}, {0, 0, 0, 0, 0}};
-    vector<int> current ={1,1,0,0};//y,x,direction(0,1,2,3) // 오 왼 위 아 , depth
-    vector<vector<int>> map;
-    for(int i=0; i<board.size(); i++){
-        vector<int> tmp(board.size()+2,1);
-        if(i==0)map.push_back(tmp);
-        for(int j=0; j<board.size(); j++){
-            tmp[j+1]=board[i][j];
+bool check(int x, int y, vector<vector<int>>& board) {
+    return x >= 0 && x < N && y >= 0 && y < N && board[x][y] == 0;
+}
+int solution(vector<vector<int>> board) {
+ N = int(board.size());
+    bool visit[100][100][2]{}; // 0-가로, 1-세로
+    visit[0][0][0] = 1; // 가로로 0,0은 방문 했다, 방문 기준은 가로일때 왼쪽블럭, 세로일때 아래블럭
+
+    queue<int> Q;
+    Q.push(conv(0, 0, 0));
+
+    int ans = 0;
+    while (!Q.empty()) {
+        int szQ = int(Q.size());
+        while (szQ--) {
+            int x, y, d, K = Q.front(); Q.pop();
+            x = K / 200;
+            y = K % 200 / 2;
+            d = K % 2;
+
+            int x2 = x + ddx[d];
+            int y2 = y + ddy[d];
+
+            if ((x == N - 1 && y == N - 1 )||(x2 == N - 1 && y2 == N - 1)){return ans;}
+
+            for (int i = 0; i < 4; ++i) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+                int nx2 = x2 + dx[i];
+                int ny2 = y2 + dy[i];
+                if (!check(nx, ny, board) || !check(nx2, ny2, board)) continue;
+
+                // 단순 이동
+                if (!visit[nx][ny][d]) {
+                    visit[nx][ny][d] = 1;
+                    Q.push(conv(nx, ny, d));
+                }
+            }
+
+            // 회전 이동
+            if (d == 0) { //세로
+                if (check(x - 1, y, board) && check(x2 - 1, y2, board)) {
+                    if (!visit[x - 1][y][1]) {
+                        Q.push(conv(x - 1, y, 1));
+                        visit[x - 1][y][1] = 1;
+                    }
+                    if (!visit[x - 1][y + 1][1]) {
+                        Q.push(conv(x - 1, y + 1, 1));
+                        visit[x - 1][y + 1][1] = 1;
+                    }
+                }
+                if (check(x + 1, y, board) && check(x2 + 1, y2, board)) {
+                    if (!visit[x][y][1]) {
+                        Q.push(conv(x, y, 1));
+                        visit[x][y][1] = 1;
+                    }
+                    if (!visit[x][y + 1][1]) {
+                        Q.push(conv(x, y + 1, 1));
+                        visit[x][y + 1][1] = 1;
+                    }
+                }
+            }
+            else {
+                if (check(x, y + 1, board) && check(x2, y2 + 1, board)) {
+                    if (!visit[x][y][0]) {
+                        Q.push(conv(x, y, 0));
+                        visit[x][y][0] = 1;
+                    }
+                    if (!visit[x + 1][y][0]) {
+                        Q.push(conv(x + 1, y, 0));
+                        visit[x + 1][y][0] = 1;
+                    }
+                }
+                if (check(x, y - 1, board) && check(x2, y2 - 1, board)) {
+                    if (!visit[x][y - 1][0]) {
+                        Q.push(conv(x, y - 1, 0));
+                        visit[x][y - 1][0] = 1;
+                    }
+                    if (!visit[x + 1][y - 1][0]) {
+                        Q.push(conv(x + 1, y - 1, 0));
+                        visit[x + 1][y - 1][0] = 1;
+                    }
+                }
+            }
         }
-        map.push_back(tmp);
-        if(i==board.size()-1){
-            tmp.assign(board.size()+2, 1);
-            map.push_back(tmp);
-        }
+
+        ++ans;
     }
-    cout<<bfs(map,current);
-    return 0;
+
+    return -1;
+ 
 }
